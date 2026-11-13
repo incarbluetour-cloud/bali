@@ -1,0 +1,36 @@
+<!doctype html><html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Bali live info</title>
+<style>
+:root{--navy:#1b2a5c;--line:#e6eaf0;--sub:#6b7380}
+*{box-sizing:border-box}
+html,body{margin:0;background:transparent;font-family:Pretendard,'Noto Sans KR','Malgun Gothic',sans-serif;font-size:15px;line-height:1.6;color:#222}
+.chips{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:2px}
+.chip{border:1px solid var(--line);border-radius:14px;padding:12px 16px;box-shadow:0 2px 8px rgba(20,30,60,.05);background:#fff;min-width:0}
+.chip b{display:block}
+.chip span{font-size:12px;color:var(--sub)}
+.chip .live{display:block;margin-top:8px;font-size:15px;font-weight:800;color:var(--navy)}
+.chip .live small{display:block;font-weight:500;color:var(--sub);font-size:12px;margin-top:1px}
+.chip a{color:inherit;text-decoration:none}
+@media(max-width:640px){.chips{grid-template-columns:1fr}}
+</style></head><body>
+<div class="chips">
+ <div class="chip"><b>시차 -1시간</b><span>발리는 한국보다 1시간 느립니다. 일정표 시간은 모두 현지 시각입니다.</span>
+  <span class="live" id="t">발리 현재 시각 확인 중…<small id="ts"></small></span></div>
+ <div class="chip"><b>현지 통화 · 인도네시아 루피아(IDR)</b><span id="fn">환율은 출발 전 은행 고시환율을 확인해 주세요.</span>
+  <span class="live" id="fx"><a href="https://www.google.com/search?q=100000+IDR+to+KRW" target="_blank" rel="noopener">실시간 환율 확인 중…</a><small id="fxs"></small></span></div>
+</div>
+<script>
+function f(tz,d){return new Intl.DateTimeFormat('ko-KR',{timeZone:tz,hour:'numeric',minute:'2-digit',second:'2-digit',hour12:true}).format(d)}
+function fd(tz,d){return new Intl.DateTimeFormat('ko-KR',{timeZone:tz,month:'numeric',day:'numeric',weekday:'short'}).format(d)}
+function tick(){var d=new Date();
+ document.getElementById('t').firstChild.nodeValue='지금 발리 '+f('Asia/Makassar',d);
+ document.getElementById('ts').textContent=fd('Asia/Makassar',d)+' · WITA(UTC+8) / 한국 '+f('Asia/Seoul',d)}
+tick();setInterval(tick,1000);
+var urls=['https://latest.currency-api.pages.dev/v1/currencies/idr.json','https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/idr.json'];
+function n(v){return Math.round(v).toLocaleString('ko-KR')}
+function show(j,src){var r=j&&j.idr&&j.idr.krw;if(!r)throw 0;
+ var el=document.getElementById('fx');el.innerHTML='<a href="https://www.google.com/search?q=100000+IDR+to+KRW" target="_blank" rel="noopener">1,000 IDR ≈ '+n(r*1000)+'원 · 100,000 IDR ≈ '+n(r*100000)+'원</a><small id="fxs">'+(j.date||'')+' 기준 시장환율 (참고용)</small>';
+ document.getElementById('fn').textContent='환전 금액은 환전소·카드 수수료에 따라 달라집니다.'}
+function bak(){fetch('https://open.er-api.com/v6/latest/IDR').then(function(r){return r.json()}).then(function(j){show({idr:{krw:j.rates.KRW},date:(j.time_last_update_utc||'').slice(5,16)})}).catch(function(){})}
+function load(i){if(i>=urls.length){bak();return}fetch(urls[i]).then(function(r){return r.json()}).then(show).catch(function(){load(i+1)})}
+load(0);
+</script></body></html>
